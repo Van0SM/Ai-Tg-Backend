@@ -61,7 +61,7 @@ Questionable life decisions
 ## Current status
 
 ```bash
-[███████░░░░░░░░░░] backend sanity: unstable
+[███████::::::::::] backend sanity: unstable
 ```
 
 ---
@@ -73,5 +73,4 @@ Questionable life decisions
 
 И автор этим гордится.
 
-Весь наш мир хаотичен.
-Тем он и прекрасен.
+Весь наш мир хаотичен, тем он и прекрасен.
