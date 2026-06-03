@@ -18,6 +18,15 @@ class Base(DeclarativeBase):
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
-        # Before losing all passwords
-        yield session
-        # After losing all passwords
+        try:
+            # Before losing all passwords
+            yield session
+            # After losing all passwords
+
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+
+        finally:
+            await session.close()
