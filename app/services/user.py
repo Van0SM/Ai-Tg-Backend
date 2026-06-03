@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.user import UserRepository
 from app.models.user import User
+from app.exceptions.user import UserAlreadyExistsError
 
 
 class UserService:
@@ -18,7 +19,7 @@ class UserService:
     ) -> User:
         user = await self.user_repository.get_user_by_tg_id(telegram_id)
         if user is not None:
-            return user
+            raise UserAlreadyExistsError()
 
         user = await self.user_repository.create_user(telegram_id, username)
         return user
