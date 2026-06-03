@@ -2,9 +2,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, status, HTTPException
 
 from app.schemas.user import UserCreateSchema, UserResponseSchema
-from app.services.user import UserService
+from app.api.dependencies.user import get_user_service
 from app.core.database import get_db
 from app.exceptions.user import UserAlreadyExistsError
+from app.services.user import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -13,10 +14,8 @@ router = APIRouter(prefix="/users", tags=["users"])
     "/", response_model=UserResponseSchema, status_code=status.HTTP_201_CREATED
 )
 async def create_user(
-    user: UserCreateSchema,
-    session: AsyncSession = Depends(get_db),
+    user: UserCreateSchema, user_service: UserService = Depends(get_user_service)
 ):
-    user_service = UserService(session)
 
     try:
         return await user_service.create_user_if_not_exists(
