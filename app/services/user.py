@@ -12,14 +12,13 @@ class UserService:
 
         self.user_repository = UserRepository(session)
 
-    async def create_user_if_not_exists(
-        self,
-        telegram_id: int,
-        username: str | None = None,
-    ) -> User:
+    async def get_or_create_user(self, telegram_id: int, username: str | None = None) -> User:
         user = await self.user_repository.get_user_by_tg_id(telegram_id)
+
         if user is not None:
-            raise UserAlreadyExistsError()
+            return user
 
         user = await self.user_repository.create_user(telegram_id, username)
+
+        await self.session.commit()
         return user
