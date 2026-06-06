@@ -6,6 +6,7 @@ from aiogram.types import Message
 from app.services.user import UserService
 from app.core.database import async_session_maker
 from app.bot.keyboards.main_menu import main_menu
+from app.bot.texts.welcome import get_welcome_text
 
 start_router = Router()
 
@@ -26,11 +27,11 @@ async def bot_start(message: Message):
 
         if created:
             await message.answer(
-                text=f"Регистрация успешна. Добро пожаловать, {user.username}",
+                text=get_welcome_text(created),
                 reply_markup=main_menu,
             )  # не придумал нормальные надписи
         else:
             await message.answer(
-                text=f"С возвращением, {user.username}",
+                text=get_welcome_text(created),
                 reply_markup=main_menu,
             )
