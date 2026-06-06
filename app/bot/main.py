@@ -7,7 +7,9 @@ from aiogram.enums import ParseMode
 from app.core.config import settings
 from app.bot.handlers.start import start_router
 
-bot = Bot(token=settings.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(
+    token=settings.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+)
 dp = Dispatcher()
 
 
