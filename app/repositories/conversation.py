@@ -9,12 +9,11 @@ class ConversationRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create_conversation(self, title: str) -> Conversation:
-        conversation = Conversation(
-            title=title,
-        )
+    async def create_conversation(self, title: str, user_id: int) -> Conversation:
+        conversation = Conversation(title=title, user_id=user_id)
 
         self.session.add(conversation)
+
         await self.session.flush()
 
         return conversation
