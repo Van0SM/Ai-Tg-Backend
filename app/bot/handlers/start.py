@@ -29,7 +29,7 @@ async def bot_start(message: Message):
             await message.answer(
                 text=get_welcome_text(created),
                 reply_markup=main_menu,
-            )  # не придумал нормальные надписи
+            )
         else:
             await message.answer(
                 text=get_welcome_text(created),
