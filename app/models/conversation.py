@@ -2,29 +2,26 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import BigInteger, String, func, ForeignKey
 from datetime import datetime
 
-
 from app.core.database import Base
 
 
-class User(Base):
-    __tablename__ = "users"
+class Conversation(Base):
+    __tablename__ = "conversations"
     id: Mapped[int] = mapped_column(
         BigInteger,
         primary_key=True,
     )
-    telegram_id: Mapped[int] = mapped_column(
+    user_id: Mapped[int] = mapped_column(
         BigInteger,
-        unique=True,
+        ForeignKey("users.id"),  # попробовал сам добавить, не уверен, что оно надо
+        ondelete="CASCADE",
         nullable=False,
     )
-    username: Mapped[str | None] = mapped_column(
-        String(64),
-        nullable=True,
+    title: Mapped[str] = mapped_column(
+        String(128),
+        nullable=False,
     )
     created_at: Mapped[datetime] = mapped_column(
         nullable=False,
         server_default=func.now(),
-    )
-    active_conversation_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("conversations.id"), nullable=True
     )
