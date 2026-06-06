@@ -13,8 +13,7 @@ class Message(Base):
     )
     conversation_id: Mapped[int] = mapped_column(
         BigInteger,
-        ForeignKey("conversations.id"),
-        ondelete="CASCADE",
+        ForeignKey("conversations.id", ondelete="CASCADE"),
         nullable=False,
     )
     role: Mapped[str] = mapped_column(
