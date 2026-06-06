@@ -39,3 +39,13 @@ class UserRepository:
         result = await self.session.execute(query)
 
         return bool(result.scalar())
+
+    async def get_user_by_id(self, user_id: int) -> User | None:
+        query = select(User).where(User.id == user_id)
+
+        result = await self.session.execute(query)
+
+        return result.scalar_one_or_none()
+
+    async def set_active_conversation(self, user: User, conv_id: int) -> None:
+        user.active_conversation_id = conv_id
