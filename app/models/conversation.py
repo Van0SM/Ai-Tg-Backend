@@ -13,7 +13,7 @@ class Conversation(Base):
     )
     user_id: Mapped[int] = mapped_column(
         BigInteger,
-        ForeignKey("users.id"),  # попробовал сам добавить, не уверен, что оно надо
+        ForeignKey("users.id"),
         ondelete="CASCADE",
         nullable=False,
     )
