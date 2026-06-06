@@ -25,6 +25,3 @@ class User(Base):
         nullable=False,
         server_default=func.now(),
     )
-    active_conversation_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("conversations.id"), nullable=True
-    )
