@@ -16,6 +16,13 @@ class Message(Base):
         ForeignKey("conversations.id", ondelete="CASCADE"),
         nullable=False,
     )
+    user_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
+    )
     role: Mapped[str] = mapped_column(
         String(16),
         nullable=False,
