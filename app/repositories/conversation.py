@@ -31,3 +31,16 @@ class ConversationRepository:
         result = await self.session.execute(query)
 
         return result.scalars().all()
+
+    async def get_last_conversation(self, user_id: int) -> Conversation | None:
+        query = (
+            select(Conversation)
+            .where(Conversation.user_id == user_id)
+            .order_by(
+                Conversation.created_at.desc()
+            )  # desc - от новых к старым (сортировка)
+        )
+
+        result = await self.session.execute(query)
+
+        return result.scalars().first()
