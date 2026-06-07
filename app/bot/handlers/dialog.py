@@ -9,8 +9,6 @@ from app.services.message import MessageService
 from app.core.database import async_session_maker
 from app.bot.keyboards.main_menu import main_menu
 
-from app.repositories.user import UserRepository
-
 router = Router()
 
 
@@ -22,16 +20,14 @@ async def new_dialog(message: Message):
         return
 
     async with async_session_maker() as session:
-        user_repository = UserRepository(session)
         conversation_service = ConversationService(session)
 
-        user = await user_repository.get_user_by_tg_id(tg_user.id)
+        conversation = await conversation_service.start_new_dialog(tg_user.id)
 
-        if user is None:
+        if conversation is None:
             await message.answer(text="Произошла ошибка. Попробуйте /start")
-            return
 
-        await conversation_service.create_new_conversation("Новый диалог", user.id)
+            return
 
         await message.answer(text="Новый диалог создан", reply_markup=main_menu)
 
