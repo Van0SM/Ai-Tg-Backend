@@ -9,13 +9,13 @@ from app.repositories.user import UserRepository
 class MessageService:
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.user_repository = UserRepository(self.session)
 
     async def save_user_message(self, telegram_id: int, content: str):
         conversation_repository = ConversationRepository(self.session)
         message_repository = MessageRepository(self.session)
+        user_repository = UserRepository(self.session)
 
-        user = await self.user_repository.get_user_by_tg_id(telegram_id)
+        user = await user_repository.get_user_by_tg_id(telegram_id)
 
         if user is None:
             return
@@ -33,3 +33,8 @@ class MessageService:
         )
 
         await self.session.commit()
+
+    async def build_conversation_context(self, conversation_id: int) -> dict:
+        messages = self.conve
+
+        return {}
