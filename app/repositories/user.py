@@ -46,6 +46,3 @@ class UserRepository:
         result = await self.session.execute(query)
 
         return result.scalar_one_or_none()
-
-    async def set_active_conversation(self, user: User, conv_id: int) -> None:
-        user.active_conversation_id = conv_id
