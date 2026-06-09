@@ -1,3 +1,6 @@
+from types import CoroutineType
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.conversation import ConversationRepository
@@ -76,3 +79,30 @@ class MessageService:
         await self.session.commit()
 
         return response
+
+    async def process_user_message(
+        self,
+        telegram_id: int,
+        content: str,
+    ) -> str:
+        user = await self.user_repository.get_user_by_tg_id(telegram_id)
+
+        if user is None:
+            raise ValueError("User Not found")
+
+        user_id = user.id
+
+        conversation = await self.conversation_repository.get_last_conversation(user_id)
+
+        if conversation is None:
+            raise ValueError("Conversations not found")
+
+        await self.save_user_message(
+            telegram_id=telegram_id,
+            content=content,
+        )
+
+        return await self.generate_ai_response(
+            conversation_id=conversation.id,
+            user_id=user_id,
+        )
