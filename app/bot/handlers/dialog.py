@@ -6,6 +6,9 @@ from aiogram.types import Message
 from app.services.conversation import ConversationService
 from app.services.message import MessageService
 
+from app.repositories.conversation import ConversationRepository
+from app.repositories.user import UserRepository
+
 from app.core.database import async_session_maker
 from app.bot.keyboards.main_menu import main_menu
 
@@ -47,6 +50,9 @@ async def save_message(message: Message):
     async with async_session_maker() as session:
         message_service = MessageService(session)
 
-        await message_service.save_user_message(telegram_id=tg_user.id, content=content)
+        response = await message_service.process_user_message(
+            telegram_id=tg_user.id,
+            content=content,
+        )
 
-        await message.answer(text="Сообщение сохранено")
+        await message.answer(response)

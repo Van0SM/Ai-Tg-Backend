@@ -27,11 +27,6 @@ class ConversationService:
         if user is None:
             raise ValueError("User not found")
 
-        await self.user_repository.set_active_conversation(
-            user,
-            conversation.id,
-        )
-
         await self.session.commit()
 
         return conversation
