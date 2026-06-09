@@ -5,6 +5,8 @@ from app.repositories.message import MessageRepository
 
 from app.repositories.user import UserRepository
 
+FIELDS = ("role", "content")
+
 
 class MessageService:
     def __init__(self, session: AsyncSession):
@@ -34,7 +36,16 @@ class MessageService:
 
         await self.session.commit()
 
-    async def build_conversation_context(self, conversation_id: int) -> dict:
-        messages = self.conve
+    async def build_conversation_context(
+        self, conversation_id: int
+    ) -> list[dict[str, str]]:
+        message_repository = MessageRepository(self.session)
 
-        return {}
+        messages = await message_repository.get_conversation_messages(conversation_id)
+
+        context = []
+
+        for message in messages:
+            context.append({field: getattr(message, field) for field in FIELDS})
+
+        return context
