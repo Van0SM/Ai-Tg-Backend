@@ -46,3 +46,25 @@ class ConversationService:
         )
 
         return conversation
+
+    async def get_user_conversations(self, telegram_id: int) -> list[Conversation]:
+        user = await self.user_repository.get_user_by_tg_id(telegram_id)
+
+        if user is None:
+            raise ValueError("User not found")
+
+        conversations = await self.conversation_repository.get_users_conversations(
+            user.id
+        )
+
+        return list(conversations)
+
+    async def build_conversations_list(self, telegram_id: int) -> str:
+        conversations = await self.get_user_conversations(telegram_id)
+
+        lines = []
+
+        for index, conv in enumerate(conversations, start=1):
+            lines.append(f"{index}. {conv.title}")
+
+        return "\n".join(lines) if conversations else "У вас пока нет бесед."
