@@ -6,8 +6,6 @@ from aiogram.types import Message
 from app.services.conversation import ConversationService
 from app.services.message import MessageService
 
-from app.repositories.conversation import ConversationRepository
-from app.repositories.user import UserRepository
 
 from app.core.database import async_session_maker
 from app.bot.keyboards.main_menu import main_menu
@@ -35,6 +33,21 @@ async def new_dialog(message: Message):
         await message.answer(text="Новый диалог создан", reply_markup=main_menu)
 
 
+@router.message(F.text == "📜 История")
+async def get_history(message: Message):
+    tg_user = message.from_user
+
+    if tg_user is None:
+        return
+
+    async with async_session_maker() as session:
+        conversation_service = ConversationService(session)
+
+        conv_show = await conversation_service.build_conversations_list(tg_user.id)
+
+        await message.answer(text=f"Ваши беседы:\n{conv_show}")
+
+
 @router.message(F.text)
 async def save_message(message: Message):
     tg_user = message.from_user
@@ -55,4 +68,4 @@ async def save_message(message: Message):
             content=content,
         )
 
-        await message.answer(response)
+        await message.answer(response, reply_markup=main_menu)
