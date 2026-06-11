@@ -27,6 +27,8 @@ class ConversationService:
         if user is None:
             raise ValueError("User not found")
 
+        await self.user_repository.set_active_conversation(conversation.id, user)
+
         await self.session.commit()
 
         return conversation
@@ -68,3 +70,27 @@ class ConversationService:
             lines.append(f"{index}. {conv.title}")
 
         return "\n".join(lines) if conversations else "У вас пока нет бесед."
+
+    async def select_conversation(
+        self, conversation_id: int, telegram_id: int
+    ) -> Conversation:
+        user = await self.user_repository.get_user_by_tg_id(telegram_id)
+
+        if user is None:
+            raise ValueError("User not found")
+
+        conversation = await self.conversation_repository.get_conversation_by_id(
+            conversation_id
+        )
+
+        if conversation is None:
+            raise ValueError("Conversation not found")
+
+        if conversation.user_id != user.id:
+            raise ValueError(f"Conversation does not belong to user")
+
+        await self.user_repository.set_active_conversation(conversation_id, user)
+
+        await self.session.commit()
+
+        return conversation
