@@ -3,6 +3,7 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.user import User
 from app.repositories.conversation import ConversationRepository
 from app.repositories.message import MessageRepository
 
@@ -20,20 +21,14 @@ class MessageService:
         self.message_repository = MessageRepository(self.session)
         self.user_repository = UserRepository(self.session)
 
-    async def save_user_message(self, telegram_id: int, content: str):
+    async def save_user_message(self, user: User, content: str):
+        active_conv_id = await self.user_repository.get_active_conversation_id(user.id)
 
-        user = await self.user_repository.get_user_by_tg_id(telegram_id)
-
-        if user is None:
-            return
-
-        last_conv = await self.conversation_repository.get_last_conversation(user.id)
-
-        if last_conv is None:
-            return
+        if active_conv_id is None:
+            raise ValueError("User have not active conversation")
 
         await self.message_repository.create_message(
-            conversation_id=last_conv.id,
+            conversation_id=active_conv_id,
             role="user",
             content=content,
             user_id=user.id,
@@ -90,19 +85,17 @@ class MessageService:
         if user is None:
             raise ValueError("User Not found")
 
-        user_id = user.id
+        conversation_id = await self.user_repository.get_active_conversation_id(user.id)
 
-        conversation = await self.conversation_repository.get_last_conversation(user_id)
-
-        if conversation is None:
-            raise ValueError("Conversations not found")
+        if conversation_id is None:
+            raise ValueError("Conversation not found")
 
         await self.save_user_message(
-            telegram_id=telegram_id,
+            user=user,
             content=content,
         )
 
         return await self.generate_ai_response(
-            conversation_id=conversation.id,
-            user_id=user_id,
+            conversation_id=conversation_id,
+            user_id=user.id,
         )
