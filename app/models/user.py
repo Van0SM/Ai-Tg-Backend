@@ -5,6 +5,8 @@ from datetime import datetime
 
 from app.core.database import Base
 
+from app.models.conversation import Conversation
+
 
 class User(Base):
     __tablename__ = "users"
@@ -24,4 +26,9 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         nullable=False,
         server_default=func.now(),
+    )
+    active_conversation_id: Mapped[int | None] = mapped_column(
+        BigInteger,
+        ForeignKey("conversations.id"),
+        nullable=True,
     )
