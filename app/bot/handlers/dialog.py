@@ -12,6 +12,12 @@ from app.bot.keyboards.main_menu import main_menu
 
 router = Router()
 
+MENU_BUTTONS = {
+    "💬 Новый диалог",
+    "📜 История",
+    "ℹ О проекте",
+}
+
 
 @router.message(F.text == "💬 Новый диалог")
 async def new_dialog(message: Message):
@@ -33,22 +39,7 @@ async def new_dialog(message: Message):
         await message.answer(text="Новый диалог создан", reply_markup=main_menu)
 
 
-@router.message(F.text == "📜 История")
-async def get_history(message: Message):
-    tg_user = message.from_user
-
-    if tg_user is None:
-        return
-
-    async with async_session_maker() as session:
-        conversation_service = ConversationService(session)
-
-        conv_show = await conversation_service.build_conversations_list(tg_user.id)
-
-        await message.answer(text=f"Ваши беседы:\n{conv_show}")
-
-
-@router.message(F.text)
+@router.message(F.text & ~F.text.in_(MENU_BUTTONS))
 async def save_message(message: Message):
     tg_user = message.from_user
 
