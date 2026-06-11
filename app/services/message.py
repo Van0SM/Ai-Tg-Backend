@@ -1,6 +1,3 @@
-from types import CoroutineType
-from typing import Any
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
