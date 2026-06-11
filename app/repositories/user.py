@@ -3,6 +3,7 @@ from sqlalchemy import exists, select
 
 
 from app.models.user import User
+from app.models.conversation import Conversation
 
 
 class UserRepository:
@@ -46,3 +47,23 @@ class UserRepository:
         result = await self.session.execute(query)
 
         return result.scalar_one_or_none()
+
+    async def set_active_conversation(self, conversation_id: int, user: User) -> None:
+        user.active_conversation_id = conversation_id
+
+        self.session.add(user)
+
+        await self.session.flush()
+
+    async def get_active_conversation_id(
+        self,
+        user_id: int,
+    ) -> int | None:
+        user = await self.get_user_by_id(user_id)
+
+        if user is None:
+            raise ValueError("User not found")
+
+        conv_id = user.active_conversation_id
+
+        return conv_id
