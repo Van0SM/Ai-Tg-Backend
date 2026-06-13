@@ -18,6 +18,11 @@ class ConversationRepository:
 
         return conversation
 
+    async def delete_conversation(self, conversation: Conversation) -> None:
+        await self.session.delete(conversation)
+
+        await self.session.flush()
+
     async def get_conversation_by_id(self, conversation_id: int) -> Conversation | None:
         query = select(Conversation).where(Conversation.id == conversation_id)
 
