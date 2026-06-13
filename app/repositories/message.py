@@ -32,16 +32,19 @@ class MessageRepository:
         return message
 
     async def get_conversation_messages(
-        self,
-        conversation_id: int,
-    ) -> Sequence[Message]:
+        self, conversation_id: int, limit: int = 50
+    ) -> list[Message]:
 
         query = (
             select(Message)
             .where(Message.conversation_id == conversation_id)
-            .order_by(Message.created_at.asc())
+            .order_by(Message.created_at.desc())
+            .limit(limit)
         )
 
         result = await self.session.execute(query)
 
-        return result.scalars().all()
+        messages = list(result.scalars().all())
+        messages.reverse()
+
+        return messages
