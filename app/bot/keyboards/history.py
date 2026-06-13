@@ -8,18 +8,26 @@ class ConversationCallback(CallbackData, prefix="conversation"):
     id: int
 
 
+class DeleteCallback(CallbackData, prefix="del_conv"):
+    id: int
+
+
 def build_conversations_keyboard(
     conversations: list[Conversation],
 ) -> InlineKeyboardMarkup:
     buttons = []
 
     for conv in conversations:
-        button = InlineKeyboardButton(
+        conv_button = InlineKeyboardButton(
             text=conv.title,
             callback_data=ConversationCallback(id=conv.id).pack(),
         )
 
-        buttons.append([button])
+        delete_button = InlineKeyboardButton(
+            text="Удалить", callback_data=DeleteCallback(id=conv.id).pack()
+        )
+
+        buttons.append([conv_button, delete_button])
 
     kb = InlineKeyboardMarkup(inline_keyboard=buttons)
 
