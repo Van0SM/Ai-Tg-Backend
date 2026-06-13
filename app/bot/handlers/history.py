@@ -1,8 +1,13 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message
 
-from app.bot.keyboards.history import build_conversations_keyboard, ConversationCallback
+from app.bot.keyboards.history import (
+    build_conversations_keyboard,
+    ConversationCallback,
+    DeleteCallback,
+)
 
+from app.repositories.user import UserRepository
 from app.services.conversation import ConversationService
 from app.repositories.conversation import ConversationRepository
 
@@ -54,3 +59,20 @@ async def select_conversation(
         await callback.answer(
             text=f"Вы выбрали беседу: {callback_data.id}. {conversation.title}"
         )
+
+
+@router.callback_query(DeleteCallback.filter())
+async def delete_conversation(
+    callback: CallbackQuery,
+    callback_data: DeleteCallback,
+):
+    async with async_session_maker() as session:
+        conversation_service = ConversationService(session)
+
+        await conversation_service.delete_conversation(
+            callback_data.id, callback.from_user.id
+        )
+
+        await session.commit()
+
+        await callback.answer(text="Беседа удалена")
