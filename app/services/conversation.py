@@ -119,3 +119,31 @@ class ConversationService:
         return await self.conversation_repository.delete_conversation(
             conversation=conversation,
         )
+
+    async def update_title(
+        self,
+        conversation_id: int,
+        user_id: int,
+        new_title: str,
+    ) -> Conversation | None:
+        if len(new_title) > 128:
+            raise ValueError("Title can not be longer than 128 symbols")
+
+        conversation = await self.conversation_repository.get_conversation_by_id(
+            conversation_id=conversation_id,
+        )
+
+        if conversation is None:
+            return
+
+        if conversation.user_id != user_id:
+            raise ValueError("Conversation does not belong to user")
+
+        updated_conv = await self.conversation_repository.update_title(
+            conversation=conversation,
+            new_title=new_title,
+        )
+
+        await self.session.commit()
+
+        return updated_conv
