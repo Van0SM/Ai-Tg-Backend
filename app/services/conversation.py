@@ -94,3 +94,28 @@ class ConversationService:
         await self.session.commit()
 
         return conversation
+
+    async def delete_conversation(
+        self, conversation_id: int, telegram_id: int
+    ) -> Conversation | None:
+        user = await self.user_repository.get_user_by_tg_id(telegram_id)
+
+        if user is None:
+            return
+
+        if user.active_conversation_id == conversation_id:
+            await self.user_repository.clear_active_conversation(user=user)
+
+        conversation = await self.conversation_repository.get_conversation_by_id(
+            conversation_id
+        )
+
+        if conversation is None:
+            return
+
+        if conversation.user_id != user.id:
+            raise ValueError("Conversation does not belong to user")
+
+        return await self.conversation_repository.delete_conversation(
+            conversation=conversation,
+        )
