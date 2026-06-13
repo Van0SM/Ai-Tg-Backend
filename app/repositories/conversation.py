@@ -6,10 +6,17 @@ from app.models.conversation import Conversation
 
 
 class ConversationRepository:
-    def __init__(self, session: AsyncSession):
+    def __init__(
+        self,
+        session: AsyncSession,
+    ):
         self.session = session
 
-    async def create_conversation(self, title: str, user_id: int) -> Conversation:
+    async def create_conversation(
+        self,
+        title: str,
+        user_id: int,
+    ) -> Conversation:
         conversation = Conversation(title=title, user_id=user_id)
 
         self.session.add(conversation)
@@ -18,12 +25,18 @@ class ConversationRepository:
 
         return conversation
 
-    async def delete_conversation(self, conversation: Conversation) -> None:
+    async def delete_conversation(
+        self,
+        conversation: Conversation,
+    ) -> None:
         await self.session.delete(conversation)
 
         await self.session.flush()
 
-    async def get_conversation_by_id(self, conversation_id: int) -> Conversation | None:
+    async def get_conversation_by_id(
+        self,
+        conversation_id: int,
+    ) -> Conversation | None:
         query = select(Conversation).where(Conversation.id == conversation_id)
 
         result = await self.session.execute(query)
@@ -36,3 +49,19 @@ class ConversationRepository:
         result = await self.session.execute(query)
 
         return result.scalars().all()
+
+    async def update_title(
+        self,
+        conversation: Conversation,
+        new_title: str,
+    ) -> Conversation | None:
+        if conversation is None:
+            return
+
+        conversation.title = new_title
+
+        self.session.add(conversation)
+
+        await self.session.flush()
+
+        return conversation
