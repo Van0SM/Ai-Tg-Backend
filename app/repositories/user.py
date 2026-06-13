@@ -67,3 +67,10 @@ class UserRepository:
         conv_id = user.active_conversation_id
 
         return conv_id
+
+    async def clear_active_conversation(self, user: User) -> None:
+        user.active_conversation_id = None
+
+        self.session.add(user)
+
+        await self.session.flush()
