@@ -1,5 +1,7 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.context import FSMContext
 
 from app.bot.keyboards.history import (
     build_conversations_keyboard,
@@ -8,13 +10,15 @@ from app.bot.keyboards.history import (
     UpdTitleCallback,
 )
 
-from app.repositories.user import UserRepository
 from app.services.conversation import ConversationService
-from app.repositories.conversation import ConversationRepository
 
 from app.core.database import async_session_maker
 
 router = Router()
+
+
+class UpdateTitleState(StatesGroup):
+    waiting_for_title = State()
 
 
 async def refresh_history_message(
@@ -107,3 +111,58 @@ async def delete_conversation(
         )
 
         await callback.answer("Беседа удалена")
+
+
+@router.callback_query(UpdTitleCallback.filter())
+async def process_title(
+    callback: CallbackQuery,
+    callback_data: DeleteCallback,
+    state: FSMContext,
+) -> None:
+    await state.update_data(conversation_id=callback_data.id)
+
+    await state.set_state(UpdateTitleState.waiting_for_title)
+
+    await callback.answer(text="Введите новое название")
+
+
+@router.message(UpdateTitleState.waiting_for_title)
+async def update_title(
+    message: Message,
+    state: FSMContext,
+) -> None:
+    tg_user = message.from_user
+
+    if tg_user is None:
+        return
+
+    async with async_session_maker() as session:
+        conversation_service = ConversationService(
+            session=session,
+        )
+
+        data = await state.get_data()
+
+        conversation_id = data.get("conversation_id")
+
+        if conversation_id is None:
+            return
+
+        new_title = message.text
+
+        if new_title is None:
+            return
+
+        _ = await conversation_service.update_title(
+            conversation_id=conversation_id,
+            telegram_id=tg_user.id,
+            new_title=new_title,
+        )
+
+        await refresh_history_message(
+            message=message,
+            conversation_service=conversation_service,
+            telegram_id=tg_user.id,
+        )
+
+        await state.clear()
