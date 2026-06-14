@@ -123,7 +123,7 @@ class ConversationService:
     async def update_title(
         self,
         conversation_id: int,
-        user_id: int,
+        telegram_id: int,
         new_title: str,
     ) -> Conversation | None:
         if len(new_title) > 128:
@@ -136,7 +136,12 @@ class ConversationService:
         if conversation is None:
             return
 
-        if conversation.user_id != user_id:
+        user = await self.user_repository.get_user_by_tg_id(telegram_id=telegram_id)
+
+        if user is None:
+            return
+
+        if conversation.user_id != user.id:
             raise ValueError("Conversation does not belong to user")
 
         updated_conv = await self.conversation_repository.update_title(
