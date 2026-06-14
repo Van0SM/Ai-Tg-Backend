@@ -1,4 +1,4 @@
-class FakeAI:
+class AIClient:
     def __init__(self) -> None:
         pass
 

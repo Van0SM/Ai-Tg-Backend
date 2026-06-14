@@ -6,7 +6,7 @@ from app.repositories.message import MessageRepository
 
 from app.repositories.user import UserRepository
 
-from app.integrations.fake_ai import FakeAI
+from app.ai.client import AIClient
 
 FIELDS = ("role", "content")
 
@@ -17,6 +17,7 @@ class MessageService:
         self.conversation_repository = ConversationRepository(self.session)
         self.message_repository = MessageRepository(self.session)
         self.user_repository = UserRepository(self.session)
+        self.ai_client = AIClient()
 
     async def save_user_message(self, user: User, content: str):
         active_conv_id = await self.user_repository.get_active_conversation_id(user.id)
@@ -57,9 +58,7 @@ class MessageService:
 
         context = await self.build_conversation_context(conversation_id)
 
-        fake_ai = FakeAI()
-
-        response = await fake_ai.create_response(context)
+        response = await self.ai_client.create_response(context)
 
         await self.message_repository.create_message(
             conversation_id=conversation_id,
