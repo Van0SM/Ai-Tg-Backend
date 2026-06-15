@@ -7,6 +7,7 @@ from app.repositories.message import MessageRepository
 from app.repositories.user import UserRepository
 
 from app.ai.client import AIClient
+from app.ai.schemas import ChatMessage
 
 FIELDS = ("role", "content")
 
@@ -36,7 +37,7 @@ class MessageService:
 
     async def build_conversation_context(
         self, conversation_id: int
-    ) -> list[dict[str, str]]:
+    ) -> list[ChatMessage]:
         messages = await self.message_repository.get_conversation_messages(
             conversation_id
         )
