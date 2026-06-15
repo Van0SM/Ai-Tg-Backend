@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     bot_token: str
     debug: bool
 
+    openrouter_api_key: str = ""
+    openrouter_model: str = "google/gemini-2.5-flash"
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
