@@ -59,7 +59,7 @@ class MessageService:
 
         context = await self.build_conversation_context(conversation_id)
 
-        response = await self.ai_client.create_response(context)
+        response = self.ai_client.create_response(context)
 
         await self.message_repository.create_message(
             conversation_id=conversation_id,
