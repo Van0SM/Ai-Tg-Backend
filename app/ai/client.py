@@ -78,9 +78,25 @@ class AIClient:
 
         print(response)
 
+        self.validate_response(
+            response=response,
+        )
+
         return self.extract_content(
             response=response,
         )
 
-    def extract_content(self, response: dict[str, Any]) -> str:
+    def extract_content(
+        self,
+        response: dict[str, Any],
+    ) -> str:
         return response["choices"][0]["message"]["content"]
+
+    def validate_response(
+        self,
+        response: dict[str, Any],
+    ) -> None:
+        error = response.get("error")
+
+        if error is not None:
+            raise ValueError(error["message"])
