@@ -8,6 +8,7 @@ from app.repositories.user import UserRepository
 
 from app.ai.client import AIClient
 from app.ai.schemas import ChatMessage
+from app.ai.constants import MAX_CONTEXT_MESSAGES
 
 FIELDS = ("role", "content")
 
@@ -39,7 +40,8 @@ class MessageService:
         self, conversation_id: int
     ) -> list[ChatMessage]:
         messages = await self.message_repository.get_conversation_messages(
-            conversation_id
+            conversation_id=conversation_id,
+            limit=MAX_CONTEXT_MESSAGES,
         )
 
         context = []
