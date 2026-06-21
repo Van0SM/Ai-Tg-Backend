@@ -8,3 +8,16 @@ class ChatMessage(TypedDict):
         "assistant",
     ]
     content: str
+
+
+class OpenRouterMessage(TypedDict):
+    role: str
+    content: str
+
+
+class OpenRouterChoice(TypedDict):
+    message: OpenRouterMessage
+
+
+class OpenRouterResponse(TypedDict):
+    choices: list[OpenRouterChoice]

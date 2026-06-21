@@ -1,11 +1,11 @@
 import httpx
-import json
 from typing import Any
 
 from app.core.config import settings
 
-from app.ai.schemas import ChatMessage
-from app.ai.constants import SYSTEM_PROMPT, OPENROUTER_URL
+from app.ai.schemas import ChatMessage, OpenRouterResponse
+from app.ai.constants import OPENROUTER_URL
+from app.ai.prompts import SYSTEM_PROMPT
 
 
 class AIClient:
@@ -32,13 +32,14 @@ class AIClient:
             "model": self.model,
             "messages": messages,
             "max_tokens": 1000,
+            "temperature": 0.4,
         }
 
     async def _request_openrouter(
         self,
         payload: dict[str, object],
         headers: dict[str, str],
-    ) -> dict[str, Any]:
+    ) -> OpenRouterResponse:
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 url=OPENROUTER_URL,
@@ -88,13 +89,13 @@ class AIClient:
 
     def extract_content(
         self,
-        response: dict[str, Any],
+        response: OpenRouterResponse,
     ) -> str:
         return response["choices"][0]["message"]["content"]
 
     def validate_response(
         self,
-        response: dict[str, Any],
+        response: OpenRouterResponse,
     ) -> None:
         error = response.get("error")
 
