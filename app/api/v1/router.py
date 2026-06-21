@@ -18,8 +18,9 @@ async def create_user(
 ):
 
     try:
-        return await user_service.create_user_if_not_exists(
-            user.telegram_id, user.username
+        return await user_service.get_or_create_user(
+            telegram_id=user.telegram_id,
+            username=user.username,
         )
     except UserAlreadyExistsError:
         raise HTTPException(
