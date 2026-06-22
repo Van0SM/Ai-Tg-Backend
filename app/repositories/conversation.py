@@ -55,9 +55,6 @@ class ConversationRepository:
         conversation: Conversation,
         new_title: str,
     ) -> Conversation | None:
-        if conversation is None:
-            return
-
         conversation.title = new_title
 
         self.session.add(conversation)

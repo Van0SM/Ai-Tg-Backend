@@ -27,7 +27,7 @@ class MessageService:
         if active_conv_id is None:
             raise ValueError("User have not active conversation")
 
-        await self.message_repository.create_message(
+        message = await self.message_repository.create_message(
             conversation_id=active_conv_id,
             role="user",
             content=content,
@@ -35,6 +35,11 @@ class MessageService:
         )
 
         await self.session.commit()
+
+        await self.gen_conv_title(
+            conversation_id=active_conv_id,
+            first_message=message.content,
+        )
 
     async def build_conversation_context(
         self, conversation_id: int
@@ -98,3 +103,25 @@ class MessageService:
             conversation_id=conversation_id,
             user_id=user.id,
         )
+
+    async def gen_conv_title(
+        self,
+        conversation_id: int,
+        first_message: str,
+    ):
+        conversation = await self.conversation_repository.get_conversation_by_id(
+            conversation_id=conversation_id
+        )
+
+        if conversation is None:
+            return
+
+        if conversation.title == "Новый диалог":
+            new_title = await self.ai_client.generate_title(last_message=first_message)
+
+            await self.conversation_repository.update_title(
+                conversation=conversation,
+                new_title=new_title,
+            )
+
+        await self.session.commit()
