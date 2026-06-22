@@ -5,7 +5,7 @@ from app.core.config import settings
 
 from app.ai.schemas import ChatMessage, OpenRouterResponse
 from app.ai.constants import OPENROUTER_URL
-from app.ai.prompts import SYSTEM_PROMPT
+from app.ai.prompts import SYSTEM_PROMPT, GEN_TITLE_PROPMPT
 
 
 class AIClient:
@@ -58,6 +58,21 @@ class AIClient:
             "Content-Type": "application/json",
         }
 
+    def extract_content(
+        self,
+        response: OpenRouterResponse,
+    ) -> str:
+        return response["choices"][0]["message"]["content"]
+
+    def validate_response(
+        self,
+        response: OpenRouterResponse,
+    ) -> None:
+        error = response.get("error")
+
+        if error is not None:
+            raise ValueError(error["message"])
+
     async def create_response(
         self,
         context: list[ChatMessage],
@@ -87,17 +102,27 @@ class AIClient:
             response=response,
         )
 
-    def extract_content(
+    async def generate_title(
         self,
-        response: OpenRouterResponse,
+        last_message: str,
     ) -> str:
-        return response["choices"][0]["message"]["content"]
+        system_message: ChatMessage = {
+            "role": "system",
+            "content": GEN_TITLE_PROPMPT,
+        }
 
-    def validate_response(
-        self,
-        response: OpenRouterResponse,
-    ) -> None:
-        error = response.get("error")
+        user_message: ChatMessage = {
+            "role": "user",
+            "content": last_message,
+        }
 
-        if error is not None:
-            raise ValueError(error["message"])
+        payload = self.build_payload(messages=[system_message, user_message])
+
+        response = await self._request_openrouter(
+            payload=payload,
+            headers=self.build_headers(),
+        )
+
+        self.validate_response(response=response)
+
+        return self.extract_content(response=response)
