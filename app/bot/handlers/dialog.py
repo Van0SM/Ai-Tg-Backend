@@ -59,4 +59,4 @@ async def save_message(message: Message):
             content=content,
         )
 
-        await message.answer(response, reply_markup=main_menu)
+        await message.answer(response, parse_mode=None, reply_markup=main_menu)
