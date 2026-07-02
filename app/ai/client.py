@@ -102,6 +102,42 @@ class AIClient:
             response=response,
         )
 
+    # Зарефакторить и разобраться, когда будет настроение
+    def split_long_message(
+        self,
+        content: str,
+        max_length: int = 4000,
+    ) -> list[str]:
+        paragraphs = content.split("\n")
+
+        chunks: list[str] = []
+        current_chunk = ""
+
+        for paragraph in paragraphs:
+            paragraph_with_newline = paragraph + "\n"
+
+            if len(paragraph_with_newline) > max_length:
+                if current_chunk:
+                    chunks.append(current_chunk.rstrip())
+                    current_chunk = ""
+
+                for i in range(0, len(paragraph_with_newline), max_length):
+                    part = paragraph_with_newline[i : i + max_length]
+                    chunks.append(part.rstrip())
+
+                continue
+
+            if len(current_chunk) + len(paragraph_with_newline) <= max_length:
+                current_chunk += paragraph_with_newline
+            else:
+                chunks.append(current_chunk.rstrip())
+                current_chunk = paragraph_with_newline
+
+        if current_chunk:
+            chunks.append(current_chunk.rstrip())
+
+        return chunks
+
     async def generate_title(
         self,
         last_message: str,

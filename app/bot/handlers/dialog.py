@@ -1,5 +1,4 @@
 from aiogram import Router, F
-from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
 
 
@@ -9,6 +8,8 @@ from app.services.message import MessageService
 
 from app.core.database import async_session_maker
 from app.bot.keyboards.main_menu import main_menu
+
+from app.ai.client import AIClient
 
 router = Router()
 
@@ -53,10 +54,14 @@ async def save_message(message: Message):
 
     async with async_session_maker() as session:
         message_service = MessageService(session)
+        ai_client = AIClient()
 
         response = await message_service.process_user_message(
             telegram_id=tg_user.id,
             content=content,
         )
 
-        await message.answer(response, parse_mode=None, reply_markup=main_menu)
+        chunks = ai_client.split_long_message(content=response)
+
+        for chunk in chunks:
+            await message.answer(chunk, parse_mode=None, reply_markup=main_menu)
